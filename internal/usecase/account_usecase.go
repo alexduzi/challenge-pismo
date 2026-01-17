@@ -10,13 +10,15 @@ import (
 )
 
 type AccountUseCase interface {
+	CreateAccount(ctx context.Context, model model.Account) error
+	GetAccountByID(ctx context.Context, id int) (*model.Account, error)
 }
 
 type AccountUseCaseImpl struct {
 	accountRepository db.AccountRepository
 }
 
-func NewAccountUseCaseImpl(accountRepository db.AccountRepository) *AccountUseCaseImpl {
+func NewAccountUseCase(accountRepository db.AccountRepository) *AccountUseCaseImpl {
 	return &AccountUseCaseImpl{
 		accountRepository: accountRepository,
 	}

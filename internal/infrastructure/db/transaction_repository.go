@@ -54,7 +54,7 @@ func (a *TransactionRepositoryImpl) GetByID(ctx context.Context, id int) (*domai
 func (a *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain.Transaction) error {
 	query := `
 		INSERT INTO transactions (account_id, operation, amount, event_date)
-		VALUES ($1, $2)
+		VALUES ($1, $2, $3, $4)
 	`
 	_, err := a.db.ExecContext(ctx, query, transaction.AccountID, transaction.OperationTypeID, transaction.Amount, transaction.EventDate)
 	if err != nil {

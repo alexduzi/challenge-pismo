@@ -4,18 +4,18 @@ version: '3.8'
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: pismo-postgres
+    container_name: accounts-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: pismo_challenge
+      POSTGRES_DB: accounts_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d pismo_challenge"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d accounts_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=pismo_challenge
+      - DB_NAME=accounts_db
       - DB_SSLMODE=disable
     depends_on:
       postgres:

@@ -49,7 +49,7 @@ func LoadConfig() (*Config, error) {
 	viper.SetDefault("DB_PORT", "5432")
 	viper.SetDefault("DB_USER", "postgres")
 	viper.SetDefault("DB_PASSWORD", "postgres")
-	viper.SetDefault("DB_NAME", "pismo_challenge")
+	viper.SetDefault("DB_NAME", "accounts_db")
 	viper.SetDefault("DB_SSLMODE", "disable")
 	viper.SetDefault("DB_MAX_CONNS", 25)
 	viper.SetDefault("DB_MIN_CONNS", 5)

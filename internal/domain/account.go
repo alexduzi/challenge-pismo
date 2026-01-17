@@ -1,6 +1,6 @@
-package entity
+package domain
 
 type Account struct {
-	AccountID      int
-	DocumentNumber string
+	AccountID      int    `db:"account_id"`
+	DocumentNumber string `db:"document_number"`
 }

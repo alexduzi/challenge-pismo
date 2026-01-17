@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/alexduzi/challengepismo/internal/model"
 	"github.com/gin-gonic/gin"
 )
 

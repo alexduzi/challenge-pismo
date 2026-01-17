@@ -1,9 +1,9 @@
-package entity
+package domain
 
 type Transaction struct {
-	TransactionID   int
-	AccountID       int
-	OperationTypeID int
-	Amount          int64
-	EventDate       string
+	TransactionID   int    `db:"transaction_id"`
+	AccountID       int    `db:"account_id"`
+	OperationTypeID int    `db:"operation"`
+	Amount          int64  `db:"amount"`
+	EventDate       string `db:"event_date"`
 }

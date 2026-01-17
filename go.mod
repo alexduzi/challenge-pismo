@@ -4,6 +4,7 @@ go 1.25.1
 
 require (
 	github.com/gin-gonic/gin v1.11.0
+	github.com/jmoiron/sqlx v1.4.0
 	github.com/spf13/viper v1.21.0
 )
 

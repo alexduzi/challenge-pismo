@@ -1,11 +1,13 @@
-package http
+package router
 
 import (
+	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
 	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
+	cfg                *config.Config
 	accountHandler     *handler.AccountHandler
 	transactionHandler *handler.TransactionHandler
 	healthHandler      *handler.HealthHandler
@@ -13,11 +15,13 @@ type Router struct {
 }
 
 func NewRouter(
+	cfg *config.Config,
 	accountHandler *handler.AccountHandler,
 	transactionHandler *handler.TransactionHandler,
 	healthHandler *handler.HealthHandler,
 ) *Router {
 	return &Router{
+		cfg:                cfg,
 		accountHandler:     accountHandler,
 		transactionHandler: transactionHandler,
 		healthHandler:      healthHandler,
@@ -26,7 +30,11 @@ func NewRouter(
 }
 
 func (r *Router) Setup() *gin.Engine {
+	gin.SetMode(r.cfg.GinMode)
+
 	// r.engine.Use(middleware.ErrorHandlerMiddleware())
+
+	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Health checks
 	r.engine.GET("/health", r.healthHandler.GetStatus)

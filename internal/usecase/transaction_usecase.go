@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
-	dto "github.com/alexduzi/challengepismo/internal/dto/request"
+	"github.com/alexduzi/challengepismo/internal/dto/request"
 	"github.com/alexduzi/challengepismo/internal/repository"
 )
 
 type TransactionUseCase interface {
-	CreateTransaction(ctx context.Context, request dto.Transaction) error
+	CreateTransaction(ctx context.Context, request request.Transaction) error
 }
 
 type TransactionUseCaseImpl struct {
@@ -27,7 +27,7 @@ func NewTransactionUseCase(
 	}
 }
 
-func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request dto.Transaction) error {
+func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request request.Transaction) error {
 	acc, err := t.accountRepository.GetByID(ctx, request.AccountID)
 	if err != nil {
 		return err

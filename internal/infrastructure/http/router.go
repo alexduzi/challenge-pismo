@@ -1,4 +1,4 @@
-package rest
+package http
 
 import (
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
@@ -15,10 +15,12 @@ type Router struct {
 func NewRouter(
 	accountHandler *handler.AccountHandler,
 	transactionHandler *handler.TransactionHandler,
+	healthHandler *handler.HealthHandler,
 ) *Router {
 	return &Router{
 		accountHandler:     accountHandler,
 		transactionHandler: transactionHandler,
+		healthHandler:      healthHandler,
 		engine:             gin.Default(),
 	}
 }

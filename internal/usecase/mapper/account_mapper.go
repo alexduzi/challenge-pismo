@@ -7,6 +7,7 @@ import (
 
 func ToAccountResponse(account *domain.Account) *dto.Account {
 	return &dto.Account{
+		AccountID:      account.AccountID,
 		DocumentNumber: account.DocumentNumber,
 	}
 }

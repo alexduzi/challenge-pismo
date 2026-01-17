@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	dto "github.com/alexduzi/challengepismo/internal/dto/response"
+	"github.com/alexduzi/challengepismo/internal/dto/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +14,7 @@ func ErrorHandlerMiddleware() gin.HandlerFunc {
 		if len(c.Errors) > 0 && !c.Writer.Written() {
 			_ = c.Errors.Last().Err
 
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 				Message: "internal server error",
 			})
 		}

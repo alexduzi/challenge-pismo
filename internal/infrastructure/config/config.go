@@ -8,11 +8,9 @@ import (
 )
 
 type Config struct {
-	Port           string
-	WeatherAPIKey  string
-	ViaCEPBaseURL  string
-	WeatherBaseURL string
-	GinMode        string
+	AppName string
+	Port    string
+	GinMode string
 }
 
 var AppConfig *Config
@@ -29,8 +27,6 @@ func LoadConfig() (*Config, error) {
 		port = "8080" // Default fallback
 	}
 
-	viper.SetDefault("VIA_CEP_BASE_URL", "https://viacep.com.br/ws/{cep}/json/")
-	viper.SetDefault("WEATHER_BASE_URL", "http://api.weatherapi.com/v1/current.json")
 	viper.SetDefault("GIN_MODE", "debug") // debug, release, or test
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -42,16 +38,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := &Config{
-		Port:           port,
-		WeatherAPIKey:  viper.GetString("WEATHER_API_KEY"),
-		ViaCEPBaseURL:  viper.GetString("VIA_CEP_BASE_URL"),
-		WeatherBaseURL: viper.GetString("WEATHER_BASE_URL"),
-		GinMode:        viper.GetString("GIN_MODE"),
-	}
-
-	// Validate required fields
-	if config.WeatherAPIKey == "" {
-		log.Println("Warning: WEATHER_API_KEY is not set")
+		Port:    port,
+		GinMode: viper.GetString("GIN_MODE"),
 	}
 
 	AppConfig = config

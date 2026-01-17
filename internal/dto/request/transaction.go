@@ -1,4 +1,4 @@
-package model
+package dto
 
 type Transaction struct {
 	AccountID       int    `json:"account_id"`

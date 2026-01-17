@@ -4,27 +4,27 @@ import (
 	"context"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
-	"github.com/alexduzi/challengepismo/internal/infrastructure/db"
-	"github.com/alexduzi/challengepismo/internal/model"
-	"github.com/alexduzi/challengepismo/internal/model/mapper"
+	dto "github.com/alexduzi/challengepismo/internal/dto/request"
+	"github.com/alexduzi/challengepismo/internal/repository"
+	"github.com/alexduzi/challengepismo/internal/usecase/mapper"
 )
 
 type AccountUseCase interface {
-	CreateAccount(ctx context.Context, model model.Account) error
-	GetAccountByID(ctx context.Context, id int) (*model.Account, error)
+	CreateAccount(ctx context.Context, model dto.Account) error
+	GetAccountByID(ctx context.Context, id int) (*dto.Account, error)
 }
 
 type AccountUseCaseImpl struct {
-	accountRepository db.AccountRepository
+	accountRepository repository.AccountRepository
 }
 
-func NewAccountUseCase(accountRepository db.AccountRepository) *AccountUseCaseImpl {
+func NewAccountUseCase(accountRepository repository.AccountRepository) *AccountUseCaseImpl {
 	return &AccountUseCaseImpl{
 		accountRepository: accountRepository,
 	}
 }
 
-func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model model.Account) error {
+func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model dto.Account) error {
 	err := a.accountRepository.Save(ctx, domain.Account{
 		DocumentNumber: model.DocumentNumber,
 	})
@@ -37,7 +37,7 @@ func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model model.Acco
 	return nil
 }
 
-func (a *AccountUseCaseImpl) GetAccountByID(ctx context.Context, id int) (*model.Account, error) {
+func (a *AccountUseCaseImpl) GetAccountByID(ctx context.Context, id int) (*dto.Account, error) {
 	account, err := a.accountRepository.GetByID(ctx, id)
 	if err != nil {
 		return nil, err

@@ -5,29 +5,29 @@ import (
 	"fmt"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
-	"github.com/alexduzi/challengepismo/internal/infrastructure/db"
-	"github.com/alexduzi/challengepismo/internal/model"
+	dto "github.com/alexduzi/challengepismo/internal/dto/request"
+	"github.com/alexduzi/challengepismo/internal/repository"
 )
 
 type TransactionUseCase interface {
-	CreateTransaction(ctx context.Context, request model.Transaction) error
+	CreateTransaction(ctx context.Context, request dto.Transaction) error
 }
 
 type TransactionUseCaseImpl struct {
-	accountRepository     db.AccountRepository
-	transactionRepository db.TransactionRepository
+	accountRepository     repository.AccountRepository
+	transactionRepository repository.TransactionRepository
 }
 
 func NewTransactionUseCase(
-	accountRepository db.AccountRepository,
-	transactionRepository db.TransactionRepository) *TransactionUseCaseImpl {
+	accountRepository repository.AccountRepository,
+	transactionRepository repository.TransactionRepository) *TransactionUseCaseImpl {
 	return &TransactionUseCaseImpl{
 		accountRepository:     accountRepository,
 		transactionRepository: transactionRepository,
 	}
 }
 
-func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request model.Transaction) error {
+func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request dto.Transaction) error {
 	acc, err := t.accountRepository.GetByID(ctx, request.AccountID)
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		return fmt.Errorf("account with id %d not found", request.AccountID)
 	}
 
-	if _, err := model.GetOperationType(model.OperationType(request.OperationTypeID)); err != nil {
+	if _, err := domain.GetOperationType(domain.OperationType(request.OperationTypeID)); err != nil {
 		return fmt.Errorf("can't convert operation type %w", err)
 	}
 

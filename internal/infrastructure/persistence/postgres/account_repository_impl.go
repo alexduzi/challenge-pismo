@@ -1,4 +1,4 @@
-package db
+package persistence
 
 import (
 	"context"
@@ -8,14 +8,6 @@ import (
 	"github.com/alexduzi/challengepismo/internal/infrastructure/exception"
 	"github.com/jmoiron/sqlx"
 )
-
-type AccountRepository interface {
-	GetAll(ctx context.Context) ([]domain.Account, error)
-	GetByID(ctx context.Context, id int) (*domain.Account, error)
-	Save(ctx context.Context, account domain.Account) error
-	Update(ctx context.Context, account domain.Account) error
-	Delete(ctx context.Context, id int) error
-}
 
 type AccountRepositoryImpl struct {
 	db *sqlx.DB

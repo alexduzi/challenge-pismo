@@ -3,7 +3,7 @@ package response
 import "time"
 
 type AccountResponse struct {
-	AccountID      int       `json:"account_id" example:"1"`
+	AccountID      int64     `json:"account_id" example:"1"`
 	DocumentNumber string    `json:"document_number" example:"12345678900"`
 	FullName       string    `json:"full_name" example:"João da Silva"`
 	Email          string    `json:"email" example:"joao.silva@example.com"`

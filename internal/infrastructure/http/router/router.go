@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
+	"github.com/alexduzi/challengepismo/internal/infrastructure/http/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +33,7 @@ func NewRouter(
 func (r *Router) Setup() *gin.Engine {
 	gin.SetMode(r.cfg.GinMode)
 
-	// r.engine.Use(middleware.ErrorHandlerMiddleware())
+	r.engine.Use(middleware.ErrorHandlerMiddleware())
 
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

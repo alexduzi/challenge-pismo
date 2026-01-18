@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
@@ -37,23 +39,35 @@ func (a *AccountRepositoryImpl) GetByID(ctx context.Context, id int) (*domain.Ac
 	`
 	err := a.db.GetContext(ctx, &account, query, id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, exception.ErrNotFound
+		}
 		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}
 
 	return &account, nil
 }
 
-func (a *AccountRepositoryImpl) Save(ctx context.Context, account domain.Account) error {
+func (a *AccountRepositoryImpl) Save(ctx context.Context, account domain.Account) (*domain.Account, error) {
 	query := `
-		INSERT INTO accounts (account_id, document_number)
-		VALUES ($1, $2)
+		INSERT INTO accounts (document_number, full_name, email, phone, account_type)
+		VALUES (:document_number, :full_name, :email, :phone, :account_type)
+		RETURNING account_id
 	`
-	_, err := a.db.ExecContext(ctx, query, account.AccountID, account.DocumentNumber)
+
+	rows, err := a.db.NamedQueryContext(ctx, query, account)
 	if err != nil {
-		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return nil, handlePgError(err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&account.AccountID); err != nil {
+			return nil, handlePgError(err)
+		}
 	}
 
-	return nil
+	return &account, nil
 }
 
 func (a *AccountRepositoryImpl) Update(ctx context.Context, account domain.Account) error {

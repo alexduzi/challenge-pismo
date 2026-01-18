@@ -11,7 +11,7 @@ import (
 )
 
 type AccountUseCase interface {
-	CreateAccount(ctx context.Context, model request.CreateAccountRequest) error
+	CreateAccount(ctx context.Context, model request.CreateAccountRequest) (*response.AccountResponse, error)
 	GetAccountByID(ctx context.Context, id int) (*response.AccountResponse, error)
 }
 
@@ -25,17 +25,21 @@ func NewAccountUseCase(accountRepository repository.AccountRepository) *AccountU
 	}
 }
 
-func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model request.CreateAccountRequest) error {
-	err := a.accountRepository.Save(ctx, domain.Account{
+func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model request.CreateAccountRequest) (*response.AccountResponse, error) {
+	account, err := a.accountRepository.Save(ctx, domain.Account{
 		DocumentNumber: model.DocumentNumber,
+		FullName:       model.FullName,
+		Email:          model.Email,
+		Phone:          model.Phone,
+		AccountType:    model.AccountType,
 	})
 
 	if err != nil {
 		// log error
-		return err
+		return nil, err
 	}
 
-	return nil
+	return mapper.ToAccountResponse(account), nil
 }
 
 func (a *AccountUseCaseImpl) GetAccountByID(ctx context.Context, id int) (*response.AccountResponse, error) {

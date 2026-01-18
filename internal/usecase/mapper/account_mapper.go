@@ -2,11 +2,11 @@ package mapper
 
 import (
 	"github.com/alexduzi/challengepismo/internal/domain"
-	dto "github.com/alexduzi/challengepismo/internal/dto/request"
+	"github.com/alexduzi/challengepismo/internal/dto/response"
 )
 
-func ToAccountResponse(account *domain.Account) *dto.Account {
-	return &dto.Account{
+func ToAccountResponse(account *domain.Account) *response.AccountResponse {
+	return &response.AccountResponse{
 		AccountID:      account.AccountID,
 		DocumentNumber: account.DocumentNumber,
 	}

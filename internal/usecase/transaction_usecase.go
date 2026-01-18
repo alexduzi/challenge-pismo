@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
 	"github.com/alexduzi/challengepismo/internal/dto/request"
@@ -10,7 +11,7 @@ import (
 )
 
 type TransactionUseCase interface {
-	CreateTransaction(ctx context.Context, request request.Transaction) error
+	CreateTransaction(ctx context.Context, request request.CreateTransactionRequest) error
 }
 
 type TransactionUseCaseImpl struct {
@@ -27,7 +28,7 @@ func NewTransactionUseCase(
 	}
 }
 
-func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request request.Transaction) error {
+func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request request.CreateTransactionRequest) error {
 	acc, err := t.accountRepository.GetByID(ctx, request.AccountID)
 	if err != nil {
 		return err
@@ -45,6 +46,6 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		AccountID:       request.AccountID,
 		OperationTypeID: request.OperationTypeID,
 		Amount:          request.Amount,
-		EventDate:       request.EventDate,
+		EventDate:       time.Now(),
 	})
 }

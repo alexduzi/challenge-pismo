@@ -3,7 +3,12 @@
 -- Create accounts table
 CREATE TABLE IF NOT EXISTS accounts (
     account_id SERIAL PRIMARY KEY,
-    document_number VARCHAR(20) NOT NULL UNIQUE,
+    document_number VARCHAR(11) NOT NULL UNIQUE,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(15) NOT NULL,
+    account_type VARCHAR(20) NOT NULL CHECK (account_type IN ('checking', 'savings')),
+    balance DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -40,8 +45,11 @@ CREATE TABLE IF NOT EXISTS transactions (
 CREATE INDEX IF NOT EXISTS idx_transactions_account_id ON transactions(account_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_event_date ON transactions(event_date);
 CREATE INDEX IF NOT EXISTS idx_accounts_document_number ON accounts(document_number);
+CREATE INDEX IF NOT EXISTS idx_accounts_email ON accounts(email);
 
 -- Add comments
-COMMENT ON TABLE accounts IS 'Stores customer account information';
+COMMENT ON TABLE accounts IS 'Stores customer account information with enhanced fields';
 COMMENT ON TABLE transactions IS 'Stores all financial transactions';
 COMMENT ON TABLE operation_types IS 'Lookup table for transaction types';
+COMMENT ON COLUMN accounts.account_type IS 'Type of account: checking or savings';
+COMMENT ON COLUMN accounts.balance IS 'Current account balance';

@@ -20,7 +20,7 @@ func NewTransactionHandler(transactionUseCase usecase.TransactionUseCase) *Trans
 }
 
 func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
-	var req request.Transaction
+	var req request.CreateTransactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{
 			Message: "invalid request body",

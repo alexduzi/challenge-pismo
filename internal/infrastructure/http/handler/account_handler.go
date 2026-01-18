@@ -21,7 +21,7 @@ func NewAccountHandler(accountUseCase usecase.AccountUseCase) *AccountHandler {
 }
 
 func (h *AccountHandler) CreateAccount(c *gin.Context) {
-	var req request.Account
+	var req request.CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.ErrorResponse{
 			Message: "invalid request body",

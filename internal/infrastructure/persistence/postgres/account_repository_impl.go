@@ -35,7 +35,7 @@ func (a *AccountRepositoryImpl) GetByID(ctx context.Context, id int) (*domain.Ac
 	query := `
 		SELECT * FROM accounts WHERE account_id = $1
 	`
-	err := a.db.QueryRowContext(ctx, query, id).Scan(&account)
+	err := a.db.GetContext(ctx, &account, query, id)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}

@@ -35,7 +35,7 @@ func (a *TransactionRepositoryImpl) GetByID(ctx context.Context, id int) (*domai
 	query := `
 		SELECT * FROM transactions WHERE transaction_id = $1
 	`
-	err := a.db.QueryRowContext(ctx, query, id).Scan(&transaction)
+	err := a.db.GetContext(ctx, &transaction, query, id)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}

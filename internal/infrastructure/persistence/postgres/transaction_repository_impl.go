@@ -5,26 +5,32 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/exception"
+	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	"github.com/jmoiron/sqlx"
 )
 
 type TransactionRepositoryImpl struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	logger logger.Logger
 }
 
-func NewTransactionRepository(db *sqlx.DB) *TransactionRepositoryImpl {
-	return &TransactionRepositoryImpl{db}
+func NewTransactionRepository(db *sqlx.DB, logger logger.Logger) *TransactionRepositoryImpl {
+	return &TransactionRepositoryImpl{
+		db:     db,
+		logger: logger,
+	}
 }
 
-func (a *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transaction, error) {
+func (t *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transaction, error) {
 	var transactions []domain.Transaction
 	query := `
 		SELECT * FROM transactions
 	`
-	err := a.db.SelectContext(ctx, &transactions, query)
+	err := t.db.SelectContext(ctx, &transactions, query)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}
@@ -32,12 +38,12 @@ func (a *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transa
 	return transactions, nil
 }
 
-func (a *TransactionRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Transaction, error) {
+func (t *TransactionRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Transaction, error) {
 	var transaction domain.Transaction
 	query := `
 		SELECT * FROM transactions WHERE transaction_id = $1
 	`
-	err := a.db.GetContext(ctx, &transaction, query, id)
+	err := t.db.GetContext(ctx, &transaction, query, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, exception.ErrNotFound
@@ -48,14 +54,17 @@ func (a *TransactionRepositoryImpl) GetByID(ctx context.Context, id int64) (*dom
 	return &transaction, nil
 }
 
-func (a *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error) {
+func (t *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error) {
+	t.logger.Debug("Executing SELECT query", slog.String("table", "transactions"))
+
 	query := `
 		INSERT INTO transactions (account_id, operation_type_id, amount)
 		VALUES (:account_id, :operation_type_id, :amount)
 		RETURNING transaction_id, event_date, created_at
 	`
-	rows, err := a.db.NamedQueryContext(ctx, query, transaction)
+	rows, err := t.db.NamedQueryContext(ctx, query, transaction)
 	if err != nil {
+		t.logger.Error("INSERT query failed", slog.String("error", err.Error()))
 		return nil, handlePgError(err)
 	}
 	defer rows.Close()
@@ -69,7 +78,7 @@ func (a *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain
 	return &transaction, nil
 }
 
-func (a *TransactionRepositoryImpl) Update(ctx context.Context, transaction domain.Transaction) error {
+func (t *TransactionRepositoryImpl) Update(ctx context.Context, transaction domain.Transaction) error {
 	query := `
 		UPDATE transactions
 		SET account_id = $2,
@@ -77,7 +86,7 @@ func (a *TransactionRepositoryImpl) Update(ctx context.Context, transaction doma
 			amount = $4
 		WHERE transaction_id = $1
 	`
-	_, err := a.db.ExecContext(ctx, query, transaction.TransactionID, transaction.AccountID, transaction.OperationTypeID, transaction.Amount)
+	_, err := t.db.ExecContext(ctx, query, transaction.TransactionID, transaction.AccountID, transaction.OperationTypeID, transaction.Amount)
 	if err != nil {
 		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}
@@ -85,11 +94,11 @@ func (a *TransactionRepositoryImpl) Update(ctx context.Context, transaction doma
 	return nil
 }
 
-func (a *TransactionRepositoryImpl) Delete(ctx context.Context, id int64) error {
+func (t *TransactionRepositoryImpl) Delete(ctx context.Context, id int64) error {
 	query := `
 		DELETE FROM transactions WHERE transaction_id = $1
 	`
-	_, err := a.db.ExecContext(ctx, query, id)
+	_, err := t.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 	}

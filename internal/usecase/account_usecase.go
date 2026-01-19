@@ -13,7 +13,7 @@ import (
 )
 
 type AccountUseCase interface {
-	CreateAccount(ctx context.Context, model request.CreateAccountRequest) (*response.AccountResponse, error)
+	CreateAccount(ctx context.Context, request request.CreateAccountRequest) (*response.AccountResponse, error)
 	GetAccountByID(ctx context.Context, id int64) (*response.AccountResponse, error)
 }
 
@@ -29,19 +29,19 @@ func NewAccountUseCase(accountRepository repository.AccountRepository, logger lo
 	}
 }
 
-func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model request.CreateAccountRequest) (*response.AccountResponse, error) {
+func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, request request.CreateAccountRequest) (*response.AccountResponse, error) {
 	log := a.logger.WithContext(ctx)
 
 	log.Debug("Use case: Creating account",
-		slog.String("document_number", model.DocumentNumber),
+		slog.String("document_number", request.DocumentNumber),
 	)
 
 	account, err := a.accountRepository.Save(ctx, domain.Account{
-		DocumentNumber: model.DocumentNumber,
-		FullName:       model.FullName,
-		Email:          model.Email,
-		Phone:          model.Phone,
-		AccountType:    model.AccountType,
+		DocumentNumber: request.DocumentNumber,
+		FullName:       request.FullName,
+		Email:          request.Email,
+		Phone:          request.Phone,
+		AccountType:    request.AccountType,
 	})
 
 	if err != nil {

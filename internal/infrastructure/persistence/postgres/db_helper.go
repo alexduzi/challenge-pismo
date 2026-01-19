@@ -20,6 +20,11 @@ func handlePgError(err error) error {
 				return exception.ErrDuplicateEmail
 			}
 		}
+		if pgErr.Code == "23514" {
+			if strings.Contains(pgErr.ConstraintName, "amount_check") {
+				return exception.ErrInvalidAmountForOperationType
+			}
+		}
 	}
 	return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 }

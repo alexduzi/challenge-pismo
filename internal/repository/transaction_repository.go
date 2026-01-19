@@ -8,8 +8,8 @@ import (
 
 type TransactionRepository interface {
 	GetAll(ctx context.Context) ([]domain.Transaction, error)
-	GetByID(ctx context.Context, id int) (*domain.Transaction, error)
-	Save(ctx context.Context, transaction domain.Transaction) error
+	GetByID(ctx context.Context, id int64) (*domain.Transaction, error)
+	Save(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error)
 	Update(ctx context.Context, transaction domain.Transaction) error
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int64) error
 }

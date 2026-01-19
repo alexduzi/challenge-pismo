@@ -32,7 +32,7 @@ func (a *AccountRepositoryImpl) GetAll(ctx context.Context) ([]domain.Account, e
 	return accounts, nil
 }
 
-func (a *AccountRepositoryImpl) GetByID(ctx context.Context, id int) (*domain.Account, error) {
+func (a *AccountRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Account, error) {
 	var account domain.Account
 	query := `
 		SELECT * FROM accounts WHERE account_id = $1
@@ -52,7 +52,7 @@ func (a *AccountRepositoryImpl) Save(ctx context.Context, account domain.Account
 	query := `
 		INSERT INTO accounts (document_number, full_name, email, phone, account_type)
 		VALUES (:document_number, :full_name, :email, :phone, :account_type)
-		RETURNING account_id
+		RETURNING account_id, created_at, updated_at
 	`
 
 	rows, err := a.db.NamedQueryContext(ctx, query, account)
@@ -62,7 +62,7 @@ func (a *AccountRepositoryImpl) Save(ctx context.Context, account domain.Account
 	defer rows.Close()
 
 	if rows.Next() {
-		if err := rows.Scan(&account.AccountID); err != nil {
+		if err := rows.Scan(&account.AccountID, &account.CreatedAt, &account.UpdatedAt); err != nil {
 			return nil, handlePgError(err)
 		}
 	}
@@ -84,7 +84,7 @@ func (a *AccountRepositoryImpl) Update(ctx context.Context, account domain.Accou
 	return nil
 }
 
-func (a *AccountRepositoryImpl) Delete(ctx context.Context, id int) error {
+func (a *AccountRepositoryImpl) Delete(ctx context.Context, id int64) error {
 	query := `
 		DELETE FROM accounts WHERE account_id = $1
 	`

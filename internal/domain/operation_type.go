@@ -1,27 +1,24 @@
 package domain
 
-import "fmt"
-
-type OperationType int
+import "github.com/alexduzi/challengepismo/internal/infrastructure/exception"
 
 const (
-	NormalPurchase OperationType = iota
-	PurchaseInstallments
-	Withdrawal
-	CreditVoucher
+	NormalPurchase       = 1
+	PurchaseInstallments = 2
+	Withdrawal           = 3
+	CreditVoucher        = 4
 )
 
-func GetOperationType(op OperationType) (OperationType, error) {
+func ValidateOperationTypeForAmount(op int, amount float64) error {
 	switch op {
-	case NormalPurchase:
-		return NormalPurchase, nil
-	case PurchaseInstallments:
-		return PurchaseInstallments, nil
-	case Withdrawal:
-		return Withdrawal, nil
+	case NormalPurchase, PurchaseInstallments, Withdrawal:
+		if amount > 0 {
+			return exception.ErrInvalidAmountForOperationType
+		}
 	case CreditVoucher:
-		return CreditVoucher, nil
-	default:
-		return -1, fmt.Errorf("unknown operation type: %v", op)
+		if amount < 0 {
+			return exception.ErrInvalidAmountForOperationType
+		}
 	}
+	return nil
 }

@@ -6,12 +6,13 @@ import (
 )
 
 var (
-	ErrInvalidInput        = errors.New("invalid input")
-	ErrDatabaseError       = errors.New("database error")
-	ErrInternalServerError = errors.New("internal server error")
-	ErrDuplicateDocument   = errors.New("document number already exists")
-	ErrDuplicateEmail      = errors.New("email already exists")
-	ErrNotFound            = errors.New("resource not found")
+	ErrInvalidInput                  = errors.New("invalid input")
+	ErrDatabaseError                 = errors.New("database error")
+	ErrInternalServerError           = errors.New("internal server error")
+	ErrDuplicateDocument             = errors.New("document number already exists")
+	ErrDuplicateEmail                = errors.New("email already exists")
+	ErrNotFound                      = errors.New("resource not found")
+	ErrInvalidAmountForOperationType = errors.New("invalid amount for operation type")
 )
 
 type ValidationError struct {

@@ -53,7 +53,7 @@ func (h *AccountHandler) GetAccountByID(c *gin.Context) {
 		return
 	}
 
-	account, err := h.accountUseCase.GetAccountByID(c.Request.Context(), accountID)
+	account, err := h.accountUseCase.GetAccountByID(c.Request.Context(), int64(accountID))
 	if err != nil {
 		_ = c.Error(err)
 		return

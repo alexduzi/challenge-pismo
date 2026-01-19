@@ -33,6 +33,8 @@ func mapError(err error) (int, string) {
 	}
 
 	switch {
+	case errors.Is(err, exception.ErrInvalidAmountForOperationType):
+		return http.StatusUnprocessableEntity, "invalid amount for operation type"
 	case errors.Is(err, exception.ErrDuplicateDocument):
 		return http.StatusConflict, "document number already exists"
 	case errors.Is(err, exception.ErrDuplicateEmail):

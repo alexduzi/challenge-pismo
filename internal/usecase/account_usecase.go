@@ -12,7 +12,7 @@ import (
 
 type AccountUseCase interface {
 	CreateAccount(ctx context.Context, model request.CreateAccountRequest) (*response.AccountResponse, error)
-	GetAccountByID(ctx context.Context, id int) (*response.AccountResponse, error)
+	GetAccountByID(ctx context.Context, id int64) (*response.AccountResponse, error)
 }
 
 type AccountUseCaseImpl struct {
@@ -42,7 +42,7 @@ func (a *AccountUseCaseImpl) CreateAccount(ctx context.Context, model request.Cr
 	return mapper.ToAccountResponse(account), nil
 }
 
-func (a *AccountUseCaseImpl) GetAccountByID(ctx context.Context, id int) (*response.AccountResponse, error) {
+func (a *AccountUseCaseImpl) GetAccountByID(ctx context.Context, id int64) (*response.AccountResponse, error) {
 	account, err := a.accountRepository.GetByID(ctx, id)
 	if err != nil {
 		return nil, err

@@ -126,13 +126,13 @@ wire:
 # Run the application locally
 run:
 	@echo -e "$(YELLOW)Starting application...$(NC)"
-	@go run cmd/api/main.go
+	@go run ./cmd/api
 
 # Build the application
 build:
 	@echo -e "$(YELLOW)Building application...$(NC)"
 	@mkdir -p bin
-	@go build -ldflags="-s -w" -o bin/api cmd/api/main.go
+	@go build -ldflags="-s -w" -o bin/api ./cmd/api
 	@echo -e "$(GREEN)✓ Build complete: bin/api$(NC)"
 
 # Generate/regenerate Swagger documentation

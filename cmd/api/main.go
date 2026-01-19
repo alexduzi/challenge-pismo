@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,10 +11,9 @@ import (
 	"time"
 
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
-	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
 	httpRouter "github.com/alexduzi/challengepismo/internal/infrastructure/http/router"
+	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/persistence/postgres"
-	"github.com/alexduzi/challengepismo/internal/usecase"
 )
 
 func main() {
@@ -23,44 +22,48 @@ func main() {
 		panic(err)
 	}
 
+	log := logger.NewLogger(cfg)
+
 	db, err := postgres.ConnectDB(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-		panic(err)
+		log.Error("Failed to connect to database", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 	defer func() {
+		log.Info("Closing database connection")
 		if err := postgres.CloseDB(db); err != nil {
-			log.Printf("Error closing database: %v", err)
+			log.Error("Error closing database", slog.String("error", err.Error()))
 		}
 	}()
 
-	accountRepo := postgres.NewAccountRepository(db)
-	transactionRepo := postgres.NewTransactionRepository(db)
-
-	accountUseCase := usecase.NewAccountUseCase(accountRepo)
-	transactionUseCase := usecase.NewTransactionUseCase(accountRepo, transactionRepo)
-
-	accountHandler := handler.NewAccountHandler(accountUseCase)
-	transactionHandler := handler.NewTransactionHandler(transactionUseCase)
-	healthHandler := handler.NewHealthHandler(cfg)
+	app := InitializeApplication(cfg, db, log)
 
 	router := httpRouter.NewRouter(
-		cfg,
-		accountHandler,
-		transactionHandler,
-		healthHandler,
+		app.Config,
+		app.Logger,
+		app.AccountHandler,
+		app.TransactionHandler,
+		app.HealthHandler,
 	)
 	engine := router.Setup()
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%s", cfg.Port),
-		Handler: engine.Handler(),
+		Addr:         fmt.Sprintf(":%s", cfg.Port),
+		Handler:      engine.Handler(),
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
 	go func() {
-		log.Printf("Server starting on port %s", cfg.Port)
+		log.Info("Server starting",
+			slog.String("port", cfg.Port),
+			slog.String("environment", cfg.GinMode),
+			slog.String("health_check", fmt.Sprintf("http://localhost:%s/health", cfg.Port)),
+		)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Failed to start server: %v", err)
+			log.Error("Failed to start server", slog.String("error", err.Error()))
+			os.Exit(1)
 		}
 	}()
 
@@ -68,14 +71,15 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	<-stop
 
-	log.Println("Shutting down server...")
+	log.Info("Shutting down server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown %v", err)
-	} else {
-		log.Println("Server stopped gracefully")
+		log.Error("Server forced to shutdown", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
+
+	log.Info("Server stopped gracefully")
 }

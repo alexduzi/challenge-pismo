@@ -4,11 +4,13 @@ import (
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/middleware"
+	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	"github.com/gin-gonic/gin"
 )
 
 type Router struct {
 	cfg                *config.Config
+	logger             logger.Logger
 	accountHandler     *handler.AccountHandler
 	transactionHandler *handler.TransactionHandler
 	healthHandler      *handler.HealthHandler
@@ -17,22 +19,27 @@ type Router struct {
 
 func NewRouter(
 	cfg *config.Config,
+	logger logger.Logger,
 	accountHandler *handler.AccountHandler,
 	transactionHandler *handler.TransactionHandler,
 	healthHandler *handler.HealthHandler,
 ) *Router {
 	return &Router{
 		cfg:                cfg,
+		logger:             logger,
 		accountHandler:     accountHandler,
 		transactionHandler: transactionHandler,
 		healthHandler:      healthHandler,
-		engine:             gin.Default(),
+		engine:             gin.New(),
 	}
 }
 
 func (r *Router) Setup() *gin.Engine {
 	gin.SetMode(r.cfg.GinMode)
 
+	r.engine.Use(middleware.RequestIDMiddleware())
+	r.engine.Use(middleware.LoggerMiddleware(r.logger))
+	r.engine.Use(gin.Recovery())
 	r.engine.Use(middleware.ErrorHandlerMiddleware())
 
 	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -7,6 +7,7 @@ import (
 	"github.com/alexduzi/challengepismo/internal/dto/request"
 	_ "github.com/alexduzi/challengepismo/internal/dto/response" // swagger docs
 	"github.com/alexduzi/challengepismo/internal/infrastructure/exception"
+	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	customValidator "github.com/alexduzi/challengepismo/internal/infrastructure/validator"
 	"github.com/alexduzi/challengepismo/internal/usecase"
 	"github.com/gin-gonic/gin"
@@ -14,11 +15,13 @@ import (
 
 type TransactionHandler struct {
 	transactionUseCase usecase.TransactionUseCase
+	logger             logger.Logger
 }
 
-func NewTransactionHandler(transactionUseCase usecase.TransactionUseCase) *TransactionHandler {
+func NewTransactionHandler(transactionUseCase usecase.TransactionUseCase, logger logger.Logger) *TransactionHandler {
 	return &TransactionHandler{
 		transactionUseCase: transactionUseCase,
+		logger:             logger,
 	}
 }
 

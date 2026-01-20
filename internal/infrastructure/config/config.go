@@ -9,12 +9,14 @@ import (
 )
 
 type Config struct {
-	AppName   string
-	Port      string
-	GinMode   string
-	LogLevel  string
-	LogFormat string
-	Database  DatabaseConfig
+	AppName    string
+	Port       string
+	GinMode    string
+	LogLevel   string
+	LogFormat  string
+	Database   DatabaseConfig
+	ApiVersion string
+	ApiTimeout int
 }
 
 type DatabaseConfig struct {
@@ -56,6 +58,8 @@ func LoadConfig() (*Config, error) {
 	viper.SetDefault("DB_MIN_CONNS", 5)
 	viper.SetDefault("LOG_LEVEL", "info")
 	viper.SetDefault("LOG_FORMAT", "text")
+	viper.SetDefault("API_VERSION", "v1")
+	viper.SetDefault("API_TIMEOUT", 30)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -66,11 +70,13 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := &Config{
-		AppName:   viper.GetString("APP_NAME"),
-		Port:      port,
-		GinMode:   viper.GetString("GIN_MODE"),
-		LogLevel:  viper.GetString("LOG_LEVEL"),
-		LogFormat: viper.GetString("LOG_FORMAT"),
+		AppName:    viper.GetString("APP_NAME"),
+		Port:       port,
+		GinMode:    viper.GetString("GIN_MODE"),
+		LogLevel:   viper.GetString("LOG_LEVEL"),
+		LogFormat:  viper.GetString("LOG_FORMAT"),
+		ApiVersion: viper.GetString("API_VERSION"),
+		ApiTimeout: viper.GetInt("API_TIMEOUT"),
 		Database: DatabaseConfig{
 			Host:     viper.GetString("DB_HOST"),
 			Port:     viper.GetString("DB_PORT"),

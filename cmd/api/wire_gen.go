@@ -25,7 +25,7 @@ func InitializeApplication(cfg *config.Config, db *sqlx.DB, log logger.Logger) *
 	accountHandler := handler.NewAccountHandler(accountUseCaseImpl, log)
 	transactionRepositoryImpl := postgres.NewTransactionRepository(db, log)
 	transactionUseCaseImpl := usecase.NewTransactionUseCase(accountRepositoryImpl, transactionRepositoryImpl, log)
-	transactionHandler := handler.NewTransactionHandler(transactionUseCaseImpl)
+	transactionHandler := handler.NewTransactionHandler(transactionUseCaseImpl, log)
 	healthHandler := handler.NewHealthHandler(cfg)
 	application := NewApplication(cfg, log, accountHandler, transactionHandler, healthHandler)
 	return application

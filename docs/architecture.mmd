@@ -1,0 +1,31 @@
+graph TB
+    Client[HTTP Client]
+    
+    subgraph "Infrastructure Layer"
+        Router[Gin Router]
+        MW[Middlewares]
+        Handlers[Handlers]
+    end
+    
+    subgraph "Application Layer"
+        UseCases[Use Cases]
+        DTOs[DTOs]
+    end
+    
+    subgraph "Domain Layer"
+        Domain[Entities]
+        Rules[Business Rules]
+    end
+    
+    subgraph "Data Layer"
+        Repos[Repositories]
+        DB[(PostgreSQL)]
+    end
+    
+    Client --> Router
+    Router --> MW
+    MW --> Handlers
+    Handlers --> UseCases
+    UseCases --> Domain
+    UseCases --> Repos
+    Repos --> DB

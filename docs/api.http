@@ -31,6 +31,6 @@ Content-Type: application/json
 
 {
     "account_id": 1,
-    "operation": 1,
+    "operation_type_id": 1,
     "amount": -50.00
 }

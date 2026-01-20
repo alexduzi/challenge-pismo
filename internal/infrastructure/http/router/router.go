@@ -1,11 +1,14 @@
 package router
 
 import (
+	_ "github.com/alexduzi/challengepismo/docs" // swagger docs
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/handler"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/http/middleware"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Router struct {
@@ -42,7 +45,7 @@ func (r *Router) Setup() *gin.Engine {
 	r.engine.Use(gin.Recovery())
 	r.engine.Use(middleware.ErrorHandlerMiddleware())
 
-	// router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Health checks
 	r.engine.GET("/health", r.healthHandler.GetStatus)

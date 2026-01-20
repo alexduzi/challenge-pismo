@@ -1,0 +1,270 @@
+basePath: /
+definitions:
+  github_com_alexduzi_challengepismo_internal_dto_request.CreateAccountRequest:
+    properties:
+      account_type:
+        enum:
+        - checking
+        - savings
+        example: checking
+        type: string
+      document_number:
+        example: "12345678900"
+        type: string
+      email:
+        example: joao.silva@example.com
+        maxLength: 100
+        type: string
+      full_name:
+        example: João da Silva
+        maxLength: 100
+        minLength: 3
+        type: string
+      phone:
+        example: "11987654321"
+        maxLength: 15
+        minLength: 10
+        type: string
+    required:
+    - account_type
+    - document_number
+    - email
+    - full_name
+    - phone
+    type: object
+  github_com_alexduzi_challengepismo_internal_dto_request.CreateTransactionRequest:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      amount:
+        example: 100.5
+        type: number
+      operation_type_id:
+        example: 4
+        maximum: 4
+        minimum: 1
+        type: integer
+    required:
+    - account_id
+    - amount
+    - operation_type_id
+    type: object
+  github_com_alexduzi_challengepismo_internal_dto_response.AccountResponse:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      account_type:
+        example: checking
+        type: string
+      balance:
+        example: 1500.5
+        type: number
+      created_at:
+        example: "2024-01-01T10:00:00Z"
+        type: string
+      document_number:
+        example: "12345678900"
+        type: string
+      email:
+        example: joao.silva@example.com
+        type: string
+      full_name:
+        example: João da Silva
+        type: string
+      phone:
+        example: "11987654321"
+        type: string
+      updated_at:
+        example: "2024-01-01T10:00:00Z"
+        type: string
+    type: object
+  github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse:
+    properties:
+      message:
+        example: 'validation error: invalid input'
+        type: string
+    type: object
+  github_com_alexduzi_challengepismo_internal_dto_response.HealthResponse:
+    properties:
+      service:
+        example: api-account
+        type: string
+      status:
+        example: healthy
+        type: string
+      timestamp:
+        example: "2024-01-01T00:00:00Z"
+        type: string
+    type: object
+  github_com_alexduzi_challengepismo_internal_dto_response.TransactionResponse:
+    properties:
+      account_id:
+        example: 1
+        type: integer
+      amount:
+        example: 100.5
+        type: number
+      created_at:
+        example: "2024-01-01T10:00:00Z"
+        type: string
+      event_date:
+        example: "2024-01-01T10:00:00Z"
+        type: string
+      operation:
+        example: 4
+        type: integer
+      transaction_id:
+        example: 1
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: duzihd@gmail.com
+    name: Alex Duzi
+  description: API for creating/fetching accounts and transactions
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Accounts API
+  version: "1.0"
+paths:
+  /api/v1/accounts:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new account with the provided details
+      parameters:
+      - description: Account creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_request.CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Account created successfully
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.AccountResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "409":
+          description: Document number or email already exists
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+      summary: Create a new account
+      tags:
+      - accounts
+  /api/v1/accounts/{accountId}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves account details by account ID
+      parameters:
+      - description: Account ID
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Account found
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.AccountResponse'
+        "400":
+          description: Invalid account ID
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+      summary: Get account by ID
+      tags:
+      - accounts
+  /api/v1/transactions:
+    post:
+      consumes:
+      - application/json
+      description: 'Creates a new transaction for an account. Operation types: 1=Purchase,
+        2=Installment Purchase, 3=Withdrawal, 4=Payment'
+      parameters:
+      - description: Transaction creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_request.CreateTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Transaction created successfully
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.TransactionResponse'
+        "400":
+          description: Invalid request body or validation error
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "404":
+          description: Account not found
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "422":
+          description: Invalid amount for operation type
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.ErrorResponse'
+      summary: Create a new transaction
+      tags:
+      - transactions
+  /health:
+    get:
+      description: Returns the health status of the API service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.HealthResponse'
+      summary: Health check
+      tags:
+      - health
+  /readiness:
+    get:
+      description: Returns the health status of the API service
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Service is healthy
+          schema:
+            $ref: '#/definitions/github_com_alexduzi_challengepismo_internal_dto_response.HealthResponse'
+      summary: Health check
+      tags:
+      - health
+schemes:
+- http
+- https
+swagger: "2.0"

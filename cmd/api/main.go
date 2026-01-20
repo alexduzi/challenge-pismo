@@ -16,6 +16,20 @@ import (
 	"github.com/alexduzi/challengepismo/internal/infrastructure/persistence/postgres"
 )
 
+// @title Accounts API
+// @version 1.0
+// @description API for creating/fetching accounts and transactions
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Alex Duzi
+// @contact.email duzihd@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http https
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {

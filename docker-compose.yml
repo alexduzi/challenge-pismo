@@ -38,6 +38,10 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=accounts_db
       - DB_SSLMODE=disable
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+      - DB_MAX_CONNS=25
+      - DB_MIN_CONNS=5
     depends_on:
       postgres:
         condition: service_healthy

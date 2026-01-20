@@ -22,6 +22,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflag
 # Final stage
 FROM alpine:3.19
 
+RUN apk --no-cache add wget
+
 # Install ca-certificates for HTTPS requests
 RUN apk --no-cache add ca-certificates tzdata
 

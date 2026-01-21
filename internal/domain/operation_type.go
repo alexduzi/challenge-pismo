@@ -10,6 +10,10 @@ const (
 )
 
 func ValidateOperationTypeForAmount(op int, amount float64) error {
+	if amount == 0 {
+		return exception.ErrAmountGreaterThanZero
+	}
+
 	switch op {
 	case NormalPurchase, PurchaseInstallments, Withdrawal:
 		if amount > 0 {

@@ -176,16 +176,17 @@ test-integration:
 # Run tests with coverage report
 test-coverage:
 	@echo -e "$(YELLOW)Running tests with coverage...$(NC)"
-	@go test -short -coverprofile=$(COVERAGE_FILE) ./internal/...
+	@go test -short -coverprofile=$(COVERAGE_FILE) -coverpkg=./internal/... ./internal/...
 	@echo ""
 	@echo -e "$(BLUE)Coverage summary:$(NC)"
-	@go tool cover -func=$(COVERAGE_FILE) | grep total | awk '{print "Total coverage: " $$3}'
+	@go tool cover -func=$(COVERAGE_FILE) | grep -v "mocks.go" | grep total | awk '{print "Total coverage: " $$3}'
 	@rm -f $(COVERAGE_FILE)
 
 # Generate HTML coverage report and open in browser
 test-coverage-html:
 	@echo -e "$(YELLOW)Generating HTML coverage report...$(NC)"
-	@go test -short -coverprofile=$(COVERAGE_FILE) ./internal/...
+	@go test -short -coverprofile=$(COVERAGE_FILE) -coverpkg=./internal/... ./internal/...
+	@cat $(COVERAGE_FILE) | grep -v "mocks.go" > $(COVERAGE_FILE).tmp && mv $(COVERAGE_FILE).tmp $(COVERAGE_FILE)
 	@go tool cover -html=$(COVERAGE_FILE) -o $(COVERAGE_HTML)
 	@echo -e "$(GREEN)✓ Coverage report generated: $(COVERAGE_HTML)$(NC)"
 	@echo -e "$(BLUE)→ Opening in browser...$(NC)"

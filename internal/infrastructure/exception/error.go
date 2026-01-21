@@ -13,6 +13,7 @@ var (
 	ErrDuplicateEmail                = errors.New("email already exists")
 	ErrNotFound                      = errors.New("resource not found")
 	ErrInvalidAmountForOperationType = errors.New("invalid amount for operation type")
+	ErrAmountGreaterThanZero         = errors.New("amount must be greater than 0")
 )
 
 type ValidationError struct {

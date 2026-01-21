@@ -172,3 +172,21 @@ func TestErrorHandlerMiddleware_ErrInvalidAmountForOperationType(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "invalid amount for operation type", response["message"])
 }
+
+func TestErrorHandlerMiddleware_ErrAmountGreaterThanZero(t *testing.T) {
+	router := setupTestRouter()
+	router.GET("/test", func(c *gin.Context) {
+		_ = c.Error(exception.ErrAmountGreaterThanZero)
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/test", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response map[string]string
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "amount must be greater than 0", response["message"])
+}

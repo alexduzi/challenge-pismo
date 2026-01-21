@@ -48,3 +48,8 @@ func TestValidateOperationTypeForAmount_WithErr(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateOperationTypeForAmount_AmountZero(t *testing.T) {
+	err := ValidateOperationTypeForAmount(1, 0)
+	assert.ErrorIs(t, err, exception.ErrAmountGreaterThanZero, "ErrAmountGreaterThanZero")
+}

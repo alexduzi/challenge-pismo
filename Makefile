@@ -166,10 +166,10 @@ test-unit:
 	@go test -v -short ./internal/... -count=1
 	@echo -e "$(GREEN)✓ Unit tests passed!$(NC)"
 
-# Run only integration tests (requires database)
+# Run only integration tests (requires Docker for testcontainers)
 test-integration:
 	@echo -e "$(YELLOW)Running integration tests...$(NC)"
-	@echo -e "$(BLUE)→ Make sure database is running (make db-up)$(NC)"
+	@echo -e "$(BLUE)→ Using testcontainers (Docker required)$(NC)"
 	@go test -v ./test/integration/... -count=1
 	@echo -e "$(GREEN)✓ Integration tests passed!$(NC)"
 

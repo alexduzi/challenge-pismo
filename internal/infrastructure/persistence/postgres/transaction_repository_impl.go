@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"log/slog"
 
 	"github.com/alexduzi/challengepismo/internal/domain"
@@ -32,7 +31,7 @@ func (t *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transa
 	`
 	err := t.db.SelectContext(ctx, &transactions, query)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return nil, handlePgError(err)
 	}
 
 	return transactions, nil
@@ -48,7 +47,7 @@ func (t *TransactionRepositoryImpl) GetByID(ctx context.Context, id int64) (*dom
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, exception.ErrNotFound
 		}
-		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return nil, handlePgError(err)
 	}
 
 	return &transaction, nil
@@ -81,14 +80,13 @@ func (t *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain
 func (t *TransactionRepositoryImpl) Update(ctx context.Context, transaction domain.Transaction) error {
 	query := `
 		UPDATE transactions
-		SET account_id = $2,
-			operation = $3,
-			amount = $4
-		WHERE transaction_id = $1
+		SET operation_type_id = :operation_type_id,
+			amount = :amount
+		WHERE transaction_id = :transaction_id
 	`
-	_, err := t.db.ExecContext(ctx, query, transaction.TransactionID, transaction.AccountID, transaction.OperationTypeID, transaction.Amount)
+	_, err := t.db.NamedQueryContext(ctx, query, transaction)
 	if err != nil {
-		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return handlePgError(err)
 	}
 
 	return nil
@@ -100,7 +98,7 @@ func (t *TransactionRepositoryImpl) Delete(ctx context.Context, id int64) error 
 	`
 	_, err := t.db.ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return handlePgError(err)
 	}
 
 	return nil

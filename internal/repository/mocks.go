@@ -294,20 +294,31 @@ func (_c *MockAccountRepository_Save_Call) RunAndReturn(run func(ctx context.Con
 }
 
 // Update provides a mock function for the type MockAccountRepository
-func (_mock *MockAccountRepository) Update(ctx context.Context, account domain.Account) error {
+func (_mock *MockAccountRepository) Update(ctx context.Context, account domain.Account) (*domain.Account, error) {
 	ret := _mock.Called(ctx, account)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
 	}
 
-	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Account) error); ok {
+	var r0 *domain.Account
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Account) (*domain.Account, error)); ok {
+		return returnFunc(ctx, account)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Account) *domain.Account); ok {
 		r0 = returnFunc(ctx, account)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.Account)
+		}
 	}
-	return r0
+	if returnFunc, ok := ret.Get(1).(func(context.Context, domain.Account) error); ok {
+		r1 = returnFunc(ctx, account)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
 }
 
 // MockAccountRepository_Update_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Update'
@@ -340,12 +351,12 @@ func (_c *MockAccountRepository_Update_Call) Run(run func(ctx context.Context, a
 	return _c
 }
 
-func (_c *MockAccountRepository_Update_Call) Return(err error) *MockAccountRepository_Update_Call {
-	_c.Call.Return(err)
+func (_c *MockAccountRepository_Update_Call) Return(account1 *domain.Account, err error) *MockAccountRepository_Update_Call {
+	_c.Call.Return(account1, err)
 	return _c
 }
 
-func (_c *MockAccountRepository_Update_Call) RunAndReturn(run func(ctx context.Context, account domain.Account) error) *MockAccountRepository_Update_Call {
+func (_c *MockAccountRepository_Update_Call) RunAndReturn(run func(ctx context.Context, account domain.Account) (*domain.Account, error)) *MockAccountRepository_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

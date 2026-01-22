@@ -38,6 +38,23 @@ func ConnectDB(conf *config.Config) (*sqlx.DB, error) {
 	return db, nil
 }
 
+func ConnectDBWithDSN(conf *config.Config, dsn string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect(driverName, dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	db.SetMaxOpenConns(conf.Database.MaxConns)
+	db.SetMaxIdleConns(conf.Database.MinConns)
+	db.SetConnMaxLifetime(time.Hour)
+
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
+	return db, nil
+}
+
 func CloseDB(db *sqlx.DB) error {
 	if db != nil {
 		return db.Close()

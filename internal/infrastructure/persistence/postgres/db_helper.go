@@ -25,6 +25,11 @@ func handlePgError(err error) error {
 				return exception.ErrInvalidAmountForOperationType
 			}
 		}
+		if pgErr.Code == "23503" {
+			if strings.Contains(pgErr.ConstraintName, "transactions_account_id_fkey") {
+				return exception.ErrAccountNotExistsForTransaction
+			}
+		}
 	}
 	return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
 }

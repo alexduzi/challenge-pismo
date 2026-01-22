@@ -32,7 +32,7 @@ func (a *AccountRepositoryImpl) GetAll(ctx context.Context) ([]domain.Account, e
 	`
 	err := a.db.SelectContext(ctx, &accounts, query)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return nil, handlePgError(err)
 	}
 
 	return accounts, nil
@@ -83,18 +83,30 @@ func (a *AccountRepositoryImpl) Save(ctx context.Context, account domain.Account
 	return &account, nil
 }
 
-func (a *AccountRepositoryImpl) Update(ctx context.Context, account domain.Account) error {
+func (a *AccountRepositoryImpl) Update(ctx context.Context, account domain.Account) (*domain.Account, error) {
 	query := `
 		UPDATE accounts
-		SET document_number = $2
-		WHERE account_id = $1
+		SET full_name = :full_name,
+			email = :email,
+			phone = :phone,
+			account_type = :account_type,
+			updated_at = NOW()
+		WHERE account_id = :account_id
+		RETURNING updated_at
 	`
-	_, err := a.db.ExecContext(ctx, query, account.AccountID, account.DocumentNumber)
+	rows, err := a.db.NamedQueryContext(ctx, query, account)
 	if err != nil {
-		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return nil, handlePgError(err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&account.UpdatedAt); err != nil {
+			return nil, handlePgError(err)
+		}
 	}
 
-	return nil
+	return &account, nil
 }
 
 func (a *AccountRepositoryImpl) Delete(ctx context.Context, id int64) error {
@@ -103,7 +115,7 @@ func (a *AccountRepositoryImpl) Delete(ctx context.Context, id int64) error {
 	`
 	_, err := a.db.ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("%w: %v", exception.ErrDatabaseError, err)
+		return handlePgError(err)
 	}
 
 	return nil

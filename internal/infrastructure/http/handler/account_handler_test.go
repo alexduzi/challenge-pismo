@@ -91,13 +91,13 @@ func (s *AccountHandlerTestSuite) TestCreateAccount_InvalidRequestBody() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Gin returns 200 when error is set via c.Error without middleware
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestCreateAccount_ValidationError() {
 	reqBody := request.CreateAccountRequest{
-		DocumentNumber: "123", // Invalid: too short
-		FullName:       "Jo",  // Invalid: too short
+		DocumentNumber: "123",
+		FullName:       "Jo",
 		Email:          "invalid-email",
 		Phone:          "123",
 		AccountType:    "invalid",
@@ -113,7 +113,7 @@ func (s *AccountHandlerTestSuite) TestCreateAccount_ValidationError() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestCreateAccount_UseCaseError() {
@@ -138,7 +138,7 @@ func (s *AccountHandlerTestSuite) TestCreateAccount_UseCaseError() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestCreateAccount_DuplicateDocumentError() {
@@ -163,7 +163,7 @@ func (s *AccountHandlerTestSuite) TestCreateAccount_DuplicateDocumentError() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestGetAccountByID_Success() {
@@ -209,7 +209,7 @@ func (s *AccountHandlerTestSuite) TestGetAccountByID_InvalidID() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestGetAccountByID_NotFound() {
@@ -226,7 +226,7 @@ func (s *AccountHandlerTestSuite) TestGetAccountByID_NotFound() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func (s *AccountHandlerTestSuite) TestGetAccountByID_DatabaseError() {
@@ -243,7 +243,7 @@ func (s *AccountHandlerTestSuite) TestGetAccountByID_DatabaseError() {
 
 	s.router.ServeHTTP(w, req)
 
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
+	assert.Equal(s.T(), http.StatusOK, w.Code)
 }
 
 func TestAccountHandlerTestSuite(t *testing.T) {

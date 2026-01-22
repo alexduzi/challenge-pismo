@@ -33,6 +33,8 @@ func mapError(err error) (int, string) {
 	}
 
 	switch {
+	case errors.Is(err, exception.ErrAccountNotExistsForTransaction):
+		return http.StatusNotFound, "invalid account for transaction"
 	case errors.Is(err, exception.ErrAmountGreaterThanZero):
 		return http.StatusBadRequest, "amount must be greater than 0"
 	case errors.Is(err, exception.ErrInvalidAmountForOperationType):

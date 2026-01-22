@@ -32,7 +32,7 @@ func TestErrorHandlerMiddleware_NoError(t *testing.T) {
 func TestErrorHandlerMiddleware_ValidationErr(t *testing.T) {
 	router := setupTestRouter()
 	router.GET("/test", func(c *gin.Context) {
-		c.Error(exception.NewValidationError("invalid request body"))
+		_ = c.Error(exception.NewValidationError("invalid request body"))
 	})
 
 	w := httptest.NewRecorder()

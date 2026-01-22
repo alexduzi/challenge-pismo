@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/alexduzi/challengepismo/internal/constants"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -116,9 +117,10 @@ func TestLogger_WithContext_WithRequestID(t *testing.T) {
 		AppName:   "test-app",
 		GinMode:   "test",
 	}
+	requestID := "req-123"
 
 	logger := NewLogger(cfg)
-	ctx := context.WithValue(context.Background(), "request_id", "req-123")
+	ctx := context.WithValue(context.Background(), constants.RequestIDKey, requestID)
 	newLogger := logger.WithContext(ctx)
 
 	assert.NotNil(t, newLogger)

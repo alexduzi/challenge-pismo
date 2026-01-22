@@ -108,7 +108,7 @@ func TestLoggerMiddleware_ErrorAppended(t *testing.T) {
 	router.Use(ErrorHandlerMiddleware())
 
 	router.GET("/test", func(c *gin.Context) {
-		c.Error(exception.NewValidationError("invalid request body"))
+		_ = c.Error(exception.NewValidationError("invalid request body"))
 	})
 
 	w := httptest.NewRecorder()

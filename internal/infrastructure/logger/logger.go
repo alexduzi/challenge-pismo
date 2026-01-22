@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexduzi/challengepismo/internal/constants"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/config"
 )
 
@@ -93,8 +94,8 @@ func (l *SlogLogger) With(args ...any) Logger {
 }
 
 func (l *SlogLogger) WithContext(ctx context.Context) Logger {
-	if requestID, ok := ctx.Value("request_id").(string); ok {
-		return l.With(slog.String("request_id", requestID))
+	if requestID, ok := ctx.Value(constants.RequestIDKey).(string); ok {
+		return l.With(slog.String(string(constants.RequestIDKey), requestID))
 	}
 	return l
 }

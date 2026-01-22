@@ -5,6 +5,7 @@ import (
 
 	"log/slog"
 
+	"github.com/alexduzi/challengepismo/internal/constants"
 	"github.com/alexduzi/challengepismo/internal/infrastructure/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,7 @@ func LoggerMiddleware(log logger.Logger) gin.HandlerFunc {
 		path := c.Request.URL.Path
 		query := c.Request.URL.RawQuery
 
-		requestID, _ := c.Get("request_id")
+		requestID, _ := c.Get(string(constants.RequestIDKey))
 
 		c.Next()
 
@@ -33,7 +34,7 @@ func LoggerMiddleware(log logger.Logger) gin.HandlerFunc {
 		}
 
 		if requestID != nil {
-			fields = append(fields, slog.String("request_id", requestID.(string)))
+			fields = append(fields, slog.String(string(constants.RequestIDKey), requestID.(string)))
 		}
 
 		if query != "" {

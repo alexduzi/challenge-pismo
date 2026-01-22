@@ -33,14 +33,14 @@ func setupTestDatabase(ctx context.Context, conf *config.Config) (*sqlx.DB, *pos
 
 	connStr, err := pgContainer.ConnectionString(ctx)
 	if err != nil {
-		pgContainer.Terminate(ctx)
+		_ = pgContainer.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to get connection string: %w", err)
 	}
 
 	// Establish the database connection
 	db, err := conn.ConnectDBWithDSN(conf, connStr)
 	if err != nil {
-		pgContainer.Terminate(ctx)
+		_ = pgContainer.Terminate(ctx)
 		return nil, nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 

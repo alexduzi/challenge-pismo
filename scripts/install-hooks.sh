@@ -26,6 +26,17 @@ cat > "$HOOKS_DIR/pre-commit" << 'EOF'
 echo "🔍 Running pre-commit checks..."
 echo ""
 
+# Run linter
+echo "📋 Running linter..."
+if ! make lint; then
+    echo ""
+    echo "❌ Linter failed! Please fix the issues before pushing."
+    exit 1
+fi
+
+echo "✅ Linter passed!"
+echo ""
+
 # Run unit tests
 echo "🧪 Running unit tests..."
 if ! make test-unit; then

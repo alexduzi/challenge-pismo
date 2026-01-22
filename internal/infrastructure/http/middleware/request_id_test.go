@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alexduzi/challengepismo/internal/constants"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +15,7 @@ func TestRequestIDMiddleware_GeneratesID(t *testing.T) {
 	router.Use(RequestIDMiddleware())
 
 	router.GET("/test", func(c *gin.Context) {
-		requestID, exists := c.Get("request_id")
+		requestID, exists := c.Get(string(constants.RequestIDKey))
 		assert.True(t, exists)
 		assert.NotEmpty(t, requestID)
 		c.Status(http.StatusOK)
@@ -25,7 +26,7 @@ func TestRequestIDMiddleware_GeneratesID(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.NotEmpty(t, w.Header().Get("X-Request-ID"))
+	assert.NotEmpty(t, w.Header().Get(constants.XRequestID))
 }
 
 func TestRequestIDMiddleware_UsesExistingID(t *testing.T) {
@@ -35,18 +36,18 @@ func TestRequestIDMiddleware_UsesExistingID(t *testing.T) {
 	expectedID := "custom-request-id-123"
 
 	router.GET("/test", func(c *gin.Context) {
-		requestID, _ := c.Get("request_id")
+		requestID, _ := c.Get(string(constants.RequestIDKey))
 		assert.Equal(t, expectedID, requestID)
 		c.Status(http.StatusOK)
 	})
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/test", nil)
-	req.Header.Set("X-Request-ID", expectedID)
+	req.Header.Set(constants.XRequestID, expectedID)
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, expectedID, w.Header().Get("X-Request-ID"))
+	assert.Equal(t, expectedID, w.Header().Get(constants.XRequestID))
 }
 
 func TestRequestIDMiddleware_PropagatesInResponse(t *testing.T) {
@@ -63,7 +64,7 @@ func TestRequestIDMiddleware_PropagatesInResponse(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	responseID := w.Header().Get("X-Request-ID")
+	responseID := w.Header().Get(constants.XRequestID)
 	assert.NotEmpty(t, responseID)
 	assert.Len(t, responseID, 36)
 }

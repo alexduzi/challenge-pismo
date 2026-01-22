@@ -30,8 +30,5 @@ README.md
 .DS_Store
 Thumbs.db
 
-# Documentation (already in code via Swagger)
-docs/
-
 # Makefile (not needed in container)
 Makefile

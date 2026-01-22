@@ -13,19 +13,20 @@ COPY go.mod go.sum ./
 # Download dependencies
 RUN go mod download
 
-# Copy source code
+# Copy source code (já inclui wire_gen.go)
 COPY . .
 
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -ldflags="-w -s" -o /app/bin/api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -a -installsuffix cgo \
+    -ldflags="-w -s" \
+    -o /app/bin/api ./cmd/api
 
 # Final stage
 FROM alpine:3.19
 
-RUN apk --no-cache add wget
-
-# Install ca-certificates for HTTPS requests
-RUN apk --no-cache add ca-certificates tzdata
+# Install ca-certificates for HTTPS and curl for healthcheck
+RUN apk --no-cache add ca-certificates tzdata curl
 
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
@@ -44,12 +45,12 @@ USER appuser
 ENV PORT=8080 \
     GIN_MODE=release 
 
-# Expose port (will use PORT env var at runtime)
-EXPOSE ${PORT}
+# Expose port
+EXPOSE 8080
 
-# Health check (using PORT env var)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Run the application
 CMD ["./api"]

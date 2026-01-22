@@ -34,11 +34,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     operation_type_id INTEGER NOT NULL REFERENCES operation_types(operation_type_id),
     amount DECIMAL(15, 2) NOT NULL,
     event_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT amount_check CHECK (
-        (operation_type_id IN (1, 2, 3) AND amount < 0) OR
-        (operation_type_id = 4 AND amount > 0)
-    )
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes

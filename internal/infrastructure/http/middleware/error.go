@@ -37,8 +37,8 @@ func mapError(err error) (int, string) {
 		return http.StatusNotFound, "invalid account for transaction"
 	case errors.Is(err, exception.ErrAmountGreaterThanZero):
 		return http.StatusBadRequest, "amount must be greater than 0"
-	case errors.Is(err, exception.ErrInvalidAmountForOperationType):
-		return http.StatusUnprocessableEntity, "invalid amount for operation type"
+	case errors.Is(err, exception.ErrInvalidOperationType):
+		return http.StatusBadRequest, "invalid operation type"
 	case errors.Is(err, exception.ErrDuplicateDocument):
 		return http.StatusConflict, "document number already exists"
 	case errors.Is(err, exception.ErrDuplicateEmail):

@@ -315,7 +315,7 @@ func (suite *HttpHandlerTestSuite) TestHttpHandler_CreateTransaction_Purchase() 
 	tranReq := request.CreateTransactionRequest{
 		AccountID:       accResp.AccountID,
 		OperationTypeID: 1, // Purchase
-		Amount:          -50.00,
+		Amount:          50.00, // Positive input, should be normalized to negative
 	}
 
 	body, _ = json.Marshal(tranReq)
@@ -330,8 +330,8 @@ func (suite *HttpHandlerTestSuite) TestHttpHandler_CreateTransaction_Purchase() 
 	err := json.Unmarshal(w.Body.Bytes(), &tranResp)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 1, tranResp.OperationTypeID)
-	// Purchase should have negative amount
-	assert.Less(suite.T(), tranResp.Amount, float64(0))
+	// Purchase should have negative amount (normalized from positive input)
+	assert.Equal(suite.T(), -50.00, tranResp.Amount)
 }
 
 func (suite *HttpHandlerTestSuite) TestHttpHandler_CreateTransaction_Withdrawal() {
@@ -357,7 +357,7 @@ func (suite *HttpHandlerTestSuite) TestHttpHandler_CreateTransaction_Withdrawal(
 	tranReq := request.CreateTransactionRequest{
 		AccountID:       accResp.AccountID,
 		OperationTypeID: 3, // Withdrawal
-		Amount:          -75.00,
+		Amount:          75.00, // Positive input, should be normalized to negative
 	}
 
 	body, _ = json.Marshal(tranReq)
@@ -372,8 +372,8 @@ func (suite *HttpHandlerTestSuite) TestHttpHandler_CreateTransaction_Withdrawal(
 	err := json.Unmarshal(w.Body.Bytes(), &tranResp)
 	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), 3, tranResp.OperationTypeID)
-	// Withdrawal should have negative amount
-	assert.Less(suite.T(), tranResp.Amount, float64(0))
+	// Withdrawal should have negative amount (normalized from positive input)
+	assert.Equal(suite.T(), -75.00, tranResp.Amount)
 }
 
 func TestHttpHandlerTestSuite(t *testing.T) {

@@ -133,25 +133,6 @@ func (s *TransactionHandlerTestSuite) TestCreateTransaction_UseCaseError_Account
 	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
 }
 
-func (s *TransactionHandlerTestSuite) TestCreateTransaction_UseCaseError_InvalidAmountForOperationType() {
-	reqBody := request.CreateTransactionRequest{
-		AccountID:       1,
-		OperationTypeID: 1, // Purchase - should have negative amount
-		Amount:          100.50,
-	}
-
-	s.transactionUseCase.EXPECT().CreateTransaction(mock.Anything, reqBody).Return(nil, exception.ErrInvalidAmountForOperationType).Once()
-
-	body, _ := json.Marshal(reqBody)
-	req, _ := http.NewRequest(http.MethodPost, "/transactions", bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
-
-	s.router.ServeHTTP(w, req)
-
-	assert.Equal(s.T(), http.StatusOK, w.Code) // Error set via c.Error
-}
-
 func (s *TransactionHandlerTestSuite) TestCreateTransaction_UseCaseError_DatabaseError() {
 	reqBody := request.CreateTransactionRequest{
 		AccountID:       1,

@@ -62,7 +62,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_Success() {
 	s.transactionRepository.EXPECT().Save(ctx, mock.MatchedBy(func(t domain.Transaction) bool {
 		return t.AccountID == transactionRequest.AccountID &&
 			t.OperationTypeID == transactionRequest.OperationTypeID &&
-			t.Amount == transactionRequest.Amount
+			t.Amount == 100.50 // CreditVoucher stays positive
 	})).Return(expectedTransaction, nil).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
@@ -81,7 +81,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_NormalPurchase_Succe
 	transactionRequest := request.CreateTransactionRequest{
 		AccountID:       1,
 		OperationTypeID: domain.NormalPurchase,
-		Amount:          -50.00,
+		Amount:          50.00, // Positive input, will be normalized to -50.00
 	}
 
 	expectedAccount := &domain.Account{
@@ -106,7 +106,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_NormalPurchase_Succe
 	s.transactionRepository.EXPECT().Save(ctx, mock.MatchedBy(func(t domain.Transaction) bool {
 		return t.AccountID == transactionRequest.AccountID &&
 			t.OperationTypeID == transactionRequest.OperationTypeID &&
-			t.Amount == transactionRequest.Amount
+			t.Amount == -50.00 // Normalized to negative
 	})).Return(expectedTransaction, nil).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
@@ -117,45 +117,67 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_NormalPurchase_Succe
 	assert.Equal(s.T(), expectedTransaction.Amount, transactionResponse.Amount)
 }
 
-func (s *TransactionUseCaseTestSuite) TestCreateTransaction_InvalidAmountForOperationType() {
+func (s *TransactionUseCaseTestSuite) TestCreateTransaction_InvalidOperationType() {
 	ctx := context.Background()
 
 	transactionRequest := request.CreateTransactionRequest{
 		AccountID:       1,
-		OperationTypeID: domain.NormalPurchase,
+		OperationTypeID: 99, // Invalid operation type
 		Amount:          100.50,
 	}
 
 	s.logger.EXPECT().WithContext(ctx).Return(s.logger).Once()
-	s.logger.EXPECT().Warn("Use case: Operation type is invalid for this amount", mock.Anything).Once()
+	s.logger.EXPECT().Warn("Use case: Failed to normalize amount", mock.Anything).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
 
 	assert.Error(s.T(), err)
 	assert.Nil(s.T(), transactionResponse)
-	assert.ErrorIs(s.T(), err, exception.ErrInvalidAmountForOperationType)
+	assert.ErrorIs(s.T(), err, exception.ErrInvalidOperationType)
 }
 
-func (s *TransactionUseCaseTestSuite) TestCreateTransaction_CreditVoucherWithNegativeAmount() {
+func (s *TransactionUseCaseTestSuite) TestCreateTransaction_CreditVoucherWithNegativeAmount_NormalizedToPositive() {
 	ctx := context.Background()
 
 	transactionRequest := request.CreateTransactionRequest{
 		AccountID:       1,
 		OperationTypeID: domain.CreditVoucher,
-		Amount:          -100.50,
+		Amount:          -100.50, // Negative input, will be normalized to +100.50
+	}
+
+	expectedAccount := &domain.Account{
+		AccountID:      1,
+		DocumentNumber: "12345678900",
+	}
+
+	expectedTransaction := &domain.Transaction{
+		TransactionID:   1,
+		AccountID:       1,
+		OperationTypeID: domain.CreditVoucher,
+		Amount:          100.50,
 	}
 
 	s.logger.EXPECT().WithContext(ctx).Return(s.logger).Once()
-	s.logger.EXPECT().Warn("Use case: Operation type is invalid for this amount", mock.Anything).Once()
+	s.logger.EXPECT().Debug("Use case: Creating transaction", mock.Anything).Once()
+	s.logger.EXPECT().Debug("Use case: Fetching account by ID", mock.Anything).Once()
+	s.logger.EXPECT().Info("Use case: Transaction created", mock.Anything).Once()
+
+	s.accountRepository.EXPECT().GetByID(ctx, transactionRequest.AccountID).Return(expectedAccount, nil).Once()
+
+	s.transactionRepository.EXPECT().Save(ctx, mock.MatchedBy(func(t domain.Transaction) bool {
+		return t.AccountID == transactionRequest.AccountID &&
+			t.OperationTypeID == transactionRequest.OperationTypeID &&
+			t.Amount == 100.50 // Normalized to positive
+	})).Return(expectedTransaction, nil).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
 
-	assert.Error(s.T(), err)
-	assert.Nil(s.T(), transactionResponse)
-	assert.ErrorIs(s.T(), err, exception.ErrInvalidAmountForOperationType)
+	assert.NoError(s.T(), err)
+	assert.NotNil(s.T(), transactionResponse)
+	assert.Equal(s.T(), 100.50, transactionResponse.Amount)
 }
 
-func (s *TransactionUseCaseTestSuite) TestCreateTransaction_CreditVoucherWithZeroAmount() {
+func (s *TransactionUseCaseTestSuite) TestCreateTransaction_ZeroAmount() {
 	ctx := context.Background()
 
 	transactionRequest := request.CreateTransactionRequest{
@@ -165,7 +187,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_CreditVoucherWithZer
 	}
 
 	s.logger.EXPECT().WithContext(ctx).Return(s.logger).Once()
-	s.logger.EXPECT().Warn("Use case: Operation type is invalid for this amount", mock.Anything).Once()
+	s.logger.EXPECT().Warn("Use case: Failed to normalize amount", mock.Anything).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
 
@@ -257,7 +279,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_Withdrawal_Success()
 	transactionRequest := request.CreateTransactionRequest{
 		AccountID:       1,
 		OperationTypeID: domain.Withdrawal,
-		Amount:          -200.00,
+		Amount:          200.00, // Positive input, will be normalized to -200.00
 	}
 
 	expectedAccount := &domain.Account{
@@ -282,7 +304,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_Withdrawal_Success()
 	s.transactionRepository.EXPECT().Save(ctx, mock.MatchedBy(func(t domain.Transaction) bool {
 		return t.AccountID == transactionRequest.AccountID &&
 			t.OperationTypeID == transactionRequest.OperationTypeID &&
-			t.Amount == transactionRequest.Amount
+			t.Amount == -200.00 // Normalized to negative
 	})).Return(expectedTransaction, nil).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)
@@ -299,7 +321,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_PurchaseInstallments
 	transactionRequest := request.CreateTransactionRequest{
 		AccountID:       1,
 		OperationTypeID: domain.PurchaseInstallments,
-		Amount:          -300.00,
+		Amount:          300.00, // Positive input, will be normalized to -300.00
 	}
 
 	expectedAccount := &domain.Account{
@@ -324,7 +346,7 @@ func (s *TransactionUseCaseTestSuite) TestCreateTransaction_PurchaseInstallments
 	s.transactionRepository.EXPECT().Save(ctx, mock.MatchedBy(func(t domain.Transaction) bool {
 		return t.AccountID == transactionRequest.AccountID &&
 			t.OperationTypeID == transactionRequest.OperationTypeID &&
-			t.Amount == transactionRequest.Amount
+			t.Amount == -300.00 // Normalized to negative
 	})).Return(expectedTransaction, nil).Once()
 
 	transactionResponse, err := s.transactionUseCase.CreateTransaction(ctx, transactionRequest)

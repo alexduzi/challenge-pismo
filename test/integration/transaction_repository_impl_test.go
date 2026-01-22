@@ -105,23 +105,6 @@ func (suite *TransactionRepositoryTestSuite) Test02_TransactionRepository_CanCre
 	assert.ErrorIs(suite.T(), err, exception.ErrAccountNotExistsForTransaction)
 }
 
-func (suite *TransactionRepositoryTestSuite) Test03_TransactionRepository_CanCreateTransaction_ErrInvalidAmountForOperationType() {
-	if testing.Short() {
-		suite.T().Skip("Skipping integration test")
-	}
-
-	suite.transaction = &domain.Transaction{
-		AccountID:       suite.account.AccountID,
-		OperationTypeID: domain.NormalPurchase,
-		Amount:          150.0,
-	}
-
-	transaction, err := suite.transactionRepository.Save(suite.ctx, *suite.transaction)
-	assert.Nil(suite.T(), transaction)
-	assert.Error(suite.T(), err)
-	assert.ErrorIs(suite.T(), err, exception.ErrInvalidAmountForOperationType)
-}
-
 func TestTransactionRepositoryTestSuite(t *testing.T) {
 	suite.Run(t, new(TransactionRepositoryTestSuite))
 }

@@ -155,24 +155,6 @@ func TestErrorHandlerMiddleware_ErrNotFound(t *testing.T) {
 	assert.Equal(t, "resource not found", response["message"])
 }
 
-func TestErrorHandlerMiddleware_ErrInvalidAmountForOperationType(t *testing.T) {
-	router := setupTestRouter()
-	router.GET("/test", func(c *gin.Context) {
-		_ = c.Error(exception.ErrInvalidAmountForOperationType)
-	})
-
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/test", nil)
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusUnprocessableEntity, w.Code)
-
-	var response map[string]string
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-	assert.Equal(t, "invalid amount for operation type", response["message"])
-}
-
 func TestErrorHandlerMiddleware_ErrAmountGreaterThanZero(t *testing.T) {
 	router := setupTestRouter()
 	router.GET("/test", func(c *gin.Context) {
@@ -189,4 +171,22 @@ func TestErrorHandlerMiddleware_ErrAmountGreaterThanZero(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.Equal(t, "amount must be greater than 0", response["message"])
+}
+
+func TestErrorHandlerMiddleware_ErrInvalidOperationType(t *testing.T) {
+	router := setupTestRouter()
+	router.GET("/test", func(c *gin.Context) {
+		_ = c.Error(exception.ErrInvalidOperationType)
+	})
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/test", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var response map[string]string
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "invalid operation type", response["message"])
 }

@@ -18,6 +18,7 @@ A RESTful API for managing accounts and transactions built with Go, following Cl
 - [Database Migrations](#database-migrations)
 - [Docker](#docker)
 - [Makefile Commands](#makefile-commands)
+- [Git Hooks](#git-hooks)
 - [Project Structure](#project-structure)
 
 ## Overview
@@ -416,6 +417,26 @@ Run `make help` to see all available commands:
 | `make clean` | Clean build artifacts |
 | `make deps` | Download dependencies |
 | `make all` | Run full pipeline (setup, build, test, lint) |
+
+## Git Hooks
+
+The project includes a pre-commit hook that runs unit tests before each commit.
+
+### Install Git Hooks
+
+```bash
+./scripts/install-hooks.sh
+```
+
+This installs a **pre-commit** hook that automatically runs `make test-unit` before each commit. If any tests fail, the commit will be aborted.
+
+### Skip Hook Temporarily
+
+If you need to bypass the pre-commit check:
+
+```bash
+git commit --no-verify
+```
 
 ## Project Structure
 

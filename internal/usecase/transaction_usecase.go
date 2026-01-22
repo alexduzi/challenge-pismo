@@ -37,8 +37,9 @@ func NewTransactionUseCase(
 func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request request.CreateTransactionRequest) (*response.TransactionResponse, error) {
 	log := t.logger.WithContext(ctx)
 
-	if err := domain.ValidateOperationTypeForAmount(request.OperationTypeID, request.Amount); err != nil {
-		log.Warn("Use case: Operation type is invalid for this amount",
+	normalizedAmount, err := domain.NormalizeAmount(request.OperationTypeID, request.Amount)
+	if err != nil {
+		log.Warn("Use case: Failed to normalize amount",
 			slog.Int("operation_type_id", request.OperationTypeID),
 		)
 		return nil, err
@@ -52,7 +53,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		slog.Int64("account_id", request.AccountID),
 	)
 
-	_, err := t.accountRepository.GetByID(ctx, request.AccountID)
+	_, err = t.accountRepository.GetByID(ctx, request.AccountID)
 	if err != nil {
 		log.Warn("Use case: Account not found",
 			slog.Int64("account_id", request.AccountID),
@@ -63,7 +64,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 	tran, err := t.transactionRepository.Save(ctx, domain.Transaction{
 		AccountID:       request.AccountID,
 		OperationTypeID: request.OperationTypeID,
-		Amount:          request.Amount,
+		Amount:          normalizedAmount,
 		EventDate:       time.Now(),
 	})
 	if err != nil {

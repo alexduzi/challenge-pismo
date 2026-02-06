@@ -37,6 +37,19 @@ func (t *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transa
 	return transactions, nil
 }
 
+func (t *TransactionRepositoryImpl) GetAllByAccountID(ctx context.Context, accountId int64) ([]domain.Transaction, error) {
+	var transactions []domain.Transaction
+	query := `
+		SELECT * FROM transactions WHERE account_id = $1 WHERE ORDER BY transaction_id ASC
+	`
+	err := t.db.SelectContext(ctx, &transactions, query, accountId)
+	if err != nil {
+		return nil, handlePgError(err)
+	}
+
+	return transactions, nil
+}
+
 func (t *TransactionRepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.Transaction, error) {
 	var transaction domain.Transaction
 	query := `
@@ -57,8 +70,8 @@ func (t *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain
 	t.logger.Debug("Executing SELECT query", slog.String("table", "transactions"))
 
 	query := `
-		INSERT INTO transactions (account_id, operation_type_id, amount)
-		VALUES (:account_id, :operation_type_id, :amount)
+		INSERT INTO transactions (account_id, operation_type_id, amount, balance)
+		VALUES (:account_id, :operation_type_id, :amount, :balance)
 		RETURNING transaction_id, event_date, created_at
 	`
 	rows, err := t.db.NamedQueryContext(ctx, query, transaction)
@@ -82,6 +95,21 @@ func (t *TransactionRepositoryImpl) Update(ctx context.Context, transaction doma
 		UPDATE transactions
 		SET operation_type_id = :operation_type_id,
 			amount = :amount
+			balance = :balance
+		WHERE transaction_id = :transaction_id
+	`
+	_, err := t.db.NamedQueryContext(ctx, query, transaction)
+	if err != nil {
+		return handlePgError(err)
+	}
+
+	return nil
+}
+
+func (t *TransactionRepositoryImpl) UpdateForBalance(ctx context.Context, transaction domain.Transaction) error {
+	query := `
+		UPDATE transactions
+		SET balance = :balance
 		WHERE transaction_id = :transaction_id
 	`
 	_, err := t.db.NamedQueryContext(ctx, query, transaction)

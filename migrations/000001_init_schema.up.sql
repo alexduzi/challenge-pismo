@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     account_id INTEGER NOT NULL REFERENCES accounts(account_id) ON DELETE CASCADE,
     operation_type_id INTEGER NOT NULL REFERENCES operation_types(operation_type_id),
     amount DECIMAL(15, 2) NOT NULL,
+    balance DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
     event_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

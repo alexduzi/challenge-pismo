@@ -61,12 +61,56 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		return nil, err
 	}
 
+	trans, err := t.transactionRepository.GetAllByAccountID(ctx, request.AccountID)
+	if err != nil {
+		log.Warn("Use case: Transactions not found",
+			slog.Int64("account_id", request.AccountID),
+		)
+		return nil, err
+	}
+
+	newBalance := request.Amount
+
+	// NormalPurchase       = 1
+	// PurchaseInstallments = 2
+	// Withdrawal           = 3
+	// CreditVoucher        = 4
+
+	if len(trans) > 0 && request.OperationTypeID != domain.CreditVoucher {
+		for _, tran := range trans {
+			if tran.Balance == 0 {
+				continue
+			}
+
+			if request.OperationTypeID != domain.CreditVoucher {
+				newBalance = tran.Balance - request.Amount
+			} else {
+
+			}
+
+			tran.Balance = newBalance
+			err = t.transactionRepository.UpdateForBalance(ctx, tran)
+			if err != nil {
+				// log.Warn("Use case: Transactions not found",
+				// 	slog.Int64("account_id", request.AccountID),
+				// )
+				return nil, err
+			}
+
+			if newBalance == 0 {
+				break
+			}
+		}
+	}
+
 	tran, err := t.transactionRepository.Save(ctx, domain.Transaction{
 		AccountID:       request.AccountID,
 		OperationTypeID: request.OperationTypeID,
 		Amount:          normalizedAmount,
+		Balance:         newBalance, // balance corrigido
 		EventDate:       time.Now(),
 	})
+
 	if err != nil {
 		log.Error("Use case: Failed to create transaction",
 			slog.String("error", err.Error()),

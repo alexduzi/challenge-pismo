@@ -575,6 +575,74 @@ func (_c *MockTransactionRepository_GetAllByAccountID_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetAllByAccountIDTx provides a mock function for the type MockTransactionRepository
+func (_mock *MockTransactionRepository) GetAllByAccountIDTx(ctx context.Context, accountId int64) ([]domain.Transaction, error) {
+	ret := _mock.Called(ctx, accountId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAllByAccountIDTx")
+	}
+
+	var r0 []domain.Transaction
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) ([]domain.Transaction, error)); ok {
+		return returnFunc(ctx, accountId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) []domain.Transaction); ok {
+		r0 = returnFunc(ctx, accountId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Transaction)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, accountId)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionRepository_GetAllByAccountIDTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllByAccountIDTx'
+type MockTransactionRepository_GetAllByAccountIDTx_Call struct {
+	*mock.Call
+}
+
+// GetAllByAccountIDTx is a helper method to define mock.On call
+//   - ctx context.Context
+//   - accountId int64
+func (_e *MockTransactionRepository_Expecter) GetAllByAccountIDTx(ctx interface{}, accountId interface{}) *MockTransactionRepository_GetAllByAccountIDTx_Call {
+	return &MockTransactionRepository_GetAllByAccountIDTx_Call{Call: _e.mock.On("GetAllByAccountIDTx", ctx, accountId)}
+}
+
+func (_c *MockTransactionRepository_GetAllByAccountIDTx_Call) Run(run func(ctx context.Context, accountId int64)) *MockTransactionRepository_GetAllByAccountIDTx_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionRepository_GetAllByAccountIDTx_Call) Return(transactions []domain.Transaction, err error) *MockTransactionRepository_GetAllByAccountIDTx_Call {
+	_c.Call.Return(transactions, err)
+	return _c
+}
+
+func (_c *MockTransactionRepository_GetAllByAccountIDTx_Call) RunAndReturn(run func(ctx context.Context, accountId int64) ([]domain.Transaction, error)) *MockTransactionRepository_GetAllByAccountIDTx_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetByID provides a mock function for the type MockTransactionRepository
 func (_mock *MockTransactionRepository) GetByID(ctx context.Context, id int64) (*domain.Transaction, error) {
 	ret := _mock.Called(ctx, id)
@@ -711,6 +779,74 @@ func (_c *MockTransactionRepository_Save_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// SaveTx provides a mock function for the type MockTransactionRepository
+func (_mock *MockTransactionRepository) SaveTx(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error) {
+	ret := _mock.Called(ctx, transaction)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveTx")
+	}
+
+	var r0 *domain.Transaction
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Transaction) (*domain.Transaction, error)); ok {
+		return returnFunc(ctx, transaction)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Transaction) *domain.Transaction); ok {
+		r0 = returnFunc(ctx, transaction)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.Transaction)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, domain.Transaction) error); ok {
+		r1 = returnFunc(ctx, transaction)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTransactionRepository_SaveTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveTx'
+type MockTransactionRepository_SaveTx_Call struct {
+	*mock.Call
+}
+
+// SaveTx is a helper method to define mock.On call
+//   - ctx context.Context
+//   - transaction domain.Transaction
+func (_e *MockTransactionRepository_Expecter) SaveTx(ctx interface{}, transaction interface{}) *MockTransactionRepository_SaveTx_Call {
+	return &MockTransactionRepository_SaveTx_Call{Call: _e.mock.On("SaveTx", ctx, transaction)}
+}
+
+func (_c *MockTransactionRepository_SaveTx_Call) Run(run func(ctx context.Context, transaction domain.Transaction)) *MockTransactionRepository_SaveTx_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 domain.Transaction
+		if args[1] != nil {
+			arg1 = args[1].(domain.Transaction)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionRepository_SaveTx_Call) Return(transaction1 *domain.Transaction, err error) *MockTransactionRepository_SaveTx_Call {
+	_c.Call.Return(transaction1, err)
+	return _c
+}
+
+func (_c *MockTransactionRepository_SaveTx_Call) RunAndReturn(run func(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error)) *MockTransactionRepository_SaveTx_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Update provides a mock function for the type MockTransactionRepository
 func (_mock *MockTransactionRepository) Update(ctx context.Context, transaction domain.Transaction) error {
 	ret := _mock.Called(ctx, transaction)
@@ -821,6 +957,63 @@ func (_c *MockTransactionRepository_UpdateForBalance_Call) Return(err error) *Mo
 }
 
 func (_c *MockTransactionRepository_UpdateForBalance_Call) RunAndReturn(run func(ctx context.Context, transaction domain.Transaction) error) *MockTransactionRepository_UpdateForBalance_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateForBalanceTx provides a mock function for the type MockTransactionRepository
+func (_mock *MockTransactionRepository) UpdateForBalanceTx(ctx context.Context, transaction domain.Transaction) error {
+	ret := _mock.Called(ctx, transaction)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateForBalanceTx")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, domain.Transaction) error); ok {
+		r0 = returnFunc(ctx, transaction)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockTransactionRepository_UpdateForBalanceTx_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateForBalanceTx'
+type MockTransactionRepository_UpdateForBalanceTx_Call struct {
+	*mock.Call
+}
+
+// UpdateForBalanceTx is a helper method to define mock.On call
+//   - ctx context.Context
+//   - transaction domain.Transaction
+func (_e *MockTransactionRepository_Expecter) UpdateForBalanceTx(ctx interface{}, transaction interface{}) *MockTransactionRepository_UpdateForBalanceTx_Call {
+	return &MockTransactionRepository_UpdateForBalanceTx_Call{Call: _e.mock.On("UpdateForBalanceTx", ctx, transaction)}
+}
+
+func (_c *MockTransactionRepository_UpdateForBalanceTx_Call) Run(run func(ctx context.Context, transaction domain.Transaction)) *MockTransactionRepository_UpdateForBalanceTx_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 domain.Transaction
+		if args[1] != nil {
+			arg1 = args[1].(domain.Transaction)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTransactionRepository_UpdateForBalanceTx_Call) Return(err error) *MockTransactionRepository_UpdateForBalanceTx_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockTransactionRepository_UpdateForBalanceTx_Call) RunAndReturn(run func(ctx context.Context, transaction domain.Transaction) error) *MockTransactionRepository_UpdateForBalanceTx_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -15,6 +15,7 @@ import (
 type TransactionRepositoryImpl struct {
 	db     *sqlx.DB
 	logger logger.Logger
+	tx     *sqlx.Tx
 }
 
 func NewTransactionRepository(db *sqlx.DB, logger logger.Logger) *TransactionRepositoryImpl {
@@ -40,9 +41,34 @@ func (t *TransactionRepositoryImpl) GetAll(ctx context.Context) ([]domain.Transa
 func (t *TransactionRepositoryImpl) GetAllByAccountID(ctx context.Context, accountId int64) ([]domain.Transaction, error) {
 	var transactions []domain.Transaction
 	query := `
-		SELECT * FROM transactions WHERE account_id = $1 WHERE ORDER BY transaction_id ASC
+		SELECT * FROM transactions 
+		WHERE account_id = $1 
+		and balance < 0 
+		ORDER BY transaction_id
 	`
 	err := t.db.SelectContext(ctx, &transactions, query, accountId)
+	if err != nil {
+		return nil, handlePgError(err)
+	}
+
+	return transactions, nil
+}
+
+func (t *TransactionRepositoryImpl) GetAllByAccountIDTx(ctx context.Context, accountId int64) ([]domain.Transaction, error) {
+	tx, err := t.db.BeginTxx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelReadCommitted,
+	})
+	t.tx = tx
+
+	var transactions []domain.Transaction
+	query := `
+		SELECT * FROM transactions 
+		WHERE account_id = $1 
+		and balance < 0 
+		ORDER BY transaction_id
+		FOR UPDATE
+	`
+	err = t.db.SelectContext(ctx, &transactions, query, accountId)
 	if err != nil {
 		return nil, handlePgError(err)
 	}
@@ -90,6 +116,33 @@ func (t *TransactionRepositoryImpl) Save(ctx context.Context, transaction domain
 	return &transaction, nil
 }
 
+func (t *TransactionRepositoryImpl) SaveTx(ctx context.Context, transaction domain.Transaction) (*domain.Transaction, error) {
+	t.logger.Debug("Executing SELECT query", slog.String("table", "transactions"))
+
+	query := `
+		INSERT INTO transactions (account_id, operation_type_id, amount, balance)
+		VALUES (:account_id, :operation_type_id, :amount, :balance)
+		RETURNING transaction_id, event_date, created_at
+	`
+	query, args, err := t.tx.BindNamed(query, transaction)
+	if err != nil {
+		t.tx.Rollback()
+		t.logger.Error("INSERT query failed", slog.String("error", err.Error()))
+		return nil, handlePgError(err)
+	}
+
+	err = t.tx.GetContext(ctx, &transaction, query, args...)
+	if err != nil {
+		t.tx.Rollback()
+		t.logger.Error("INSERT query failed", slog.String("error", err.Error()))
+		return nil, handlePgError(err)
+	}
+
+	t.commitTx()
+
+	return &transaction, nil
+}
+
 func (t *TransactionRepositoryImpl) Update(ctx context.Context, transaction domain.Transaction) error {
 	query := `
 		UPDATE transactions
@@ -120,6 +173,21 @@ func (t *TransactionRepositoryImpl) UpdateForBalance(ctx context.Context, transa
 	return nil
 }
 
+func (t *TransactionRepositoryImpl) UpdateForBalanceTx(ctx context.Context, transaction domain.Transaction) error {
+	query := `
+		UPDATE transactions
+		SET balance = :balance
+		WHERE transaction_id = :transaction_id
+	`
+	_, err := t.tx.NamedExecContext(ctx, query, transaction)
+	if err != nil {
+		t.rollbackTx()
+		return handlePgError(err)
+	}
+
+	return nil
+}
+
 func (t *TransactionRepositoryImpl) Delete(ctx context.Context, id int64) error {
 	query := `
 		DELETE FROM transactions WHERE transaction_id = $1
@@ -129,5 +197,25 @@ func (t *TransactionRepositoryImpl) Delete(ctx context.Context, id int64) error 
 		return handlePgError(err)
 	}
 
+	return nil
+}
+
+func (t *TransactionRepositoryImpl) rollbackTx() error {
+	if t.tx != nil {
+		if err := t.tx.Rollback(); err != nil {
+			return err
+		}
+	}
+	t.tx = nil
+	return nil
+}
+
+func (t *TransactionRepositoryImpl) commitTx() error {
+	if t.tx != nil {
+		if err := t.tx.Commit(); err != nil {
+			return err
+		}
+	}
+	t.tx = nil
 	return nil
 }

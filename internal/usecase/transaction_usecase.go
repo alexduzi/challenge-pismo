@@ -45,10 +45,6 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		return nil, err
 	}
 
-	log.Debug("Use case: Creating transaction",
-		slog.Int64("account_id", request.AccountID),
-	)
-
 	log.Debug("Use case: Fetching account by ID",
 		slog.Int64("account_id", request.AccountID),
 	)
@@ -61,7 +57,7 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 		return nil, err
 	}
 
-	trans, err := t.transactionRepository.GetAllByAccountID(ctx, request.AccountID)
+	trans, err := t.transactionRepository.GetAllByAccountIDTx(ctx, request.AccountID)
 	if err != nil {
 		log.Warn("Use case: Transactions not found",
 			slog.Int64("account_id", request.AccountID),
@@ -71,25 +67,22 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 
 	newBalance := request.Amount
 
-	// NormalPurchase       = 1
-	// PurchaseInstallments = 2
-	// Withdrawal           = 3
-	// CreditVoucher        = 4
-
-	if len(trans) > 0 && request.OperationTypeID != domain.CreditVoucher {
+	if len(trans) > 0 && request.OperationTypeID == domain.CreditVoucher {
 		for _, tran := range trans {
-			if tran.Balance == 0 {
-				continue
+
+			discharge := newBalance
+			if discharge > -tran.Balance {
+				discharge = -tran.Balance
 			}
 
-			if request.OperationTypeID != domain.CreditVoucher {
-				newBalance = tran.Balance - request.Amount
-			} else {
+			newBal := tran.Balance + discharge
+			tran.Balance = newBal
 
-			}
+			log.Debug("Use case: Updating transaction",
+				slog.Int64("account_id", request.AccountID),
+			)
 
-			tran.Balance = newBalance
-			err = t.transactionRepository.UpdateForBalance(ctx, tran)
+			err = t.transactionRepository.UpdateForBalanceTx(ctx, tran)
 			if err != nil {
 				// log.Warn("Use case: Transactions not found",
 				// 	slog.Int64("account_id", request.AccountID),
@@ -97,13 +90,18 @@ func (t *TransactionUseCaseImpl) CreateTransaction(ctx context.Context, request 
 				return nil, err
 			}
 
+			newBalance -= discharge
 			if newBalance == 0 {
 				break
 			}
 		}
 	}
 
-	tran, err := t.transactionRepository.Save(ctx, domain.Transaction{
+	log.Debug("Use case: Creating transaction",
+		slog.Int64("account_id", request.AccountID),
+	)
+
+	tran, err := t.transactionRepository.SaveTx(ctx, domain.Transaction{
 		AccountID:       request.AccountID,
 		OperationTypeID: request.OperationTypeID,
 		Amount:          normalizedAmount,
